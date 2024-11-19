@@ -1,92 +1,196 @@
 #pragma once
 
+#include "intrusive_iterator.h"
+#include "list_element_base.h"
+
 #include <cstddef>
+#include <iterator>
 #include <type_traits>
 
 namespace intrusive {
 
-class default_tag;
+struct default_tag;
 
 template <typename Tag = default_tag>
-class list_element {};
+struct list_element : list_element_base {};
 
 template <typename T, typename Tag = default_tag>
 class list {
   static_assert(std::is_base_of_v<list_element<Tag>, T>, "T must derive from list_element");
 
 public:
-  using iterator = void;
-  using const_iterator = void;
+  using node = list_element<Tag>;
+
+  using iterator = intrusive_iterator<node, T>;
+  using const_iterator = intrusive_iterator<const node, const T>;
+
+  using reverse_iterator = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+  using list_element_base = std::conditional_t<std::is_const_v<T>, const list_element_base, list_element_base>;
 
 public:
   // O(1)
-  list() noexcept;
+  list() noexcept = default;
 
   // O(1)
-  ~list();
+  ~list() = default;
 
   list(const list&) = delete;
+
   list& operator=(const list&) = delete;
 
   // O(1)
-  list(list&& other) noexcept;
+  list(list&& other) noexcept = default;
 
   // O(1)
-  list& operator=(list&& other) noexcept;
+  list& operator=(list&& other) noexcept = default;
 
   // O(1)
-  bool empty() const noexcept;
+  bool empty() const noexcept {
+    return !(sentinel.is_linked());
+  }
 
   // O(n)
-  size_t size() const noexcept;
+  size_t size() const noexcept {
+    size_t answer = 0;
+    list_element_base* current_position = sentinel.next;
+    while (current_position != &sentinel) {
+      answer++;
+      current_position = current_position->next;
+    }
+    return answer;
+  } // заменить на что-то из стандарта
 
   // O(1)
-  T& front() noexcept;
+  T& front() noexcept {
+    return *(begin());
+  }
 
   // O(1)
-  const T& front() const noexcept;
+  const T& front() const noexcept {
+    return *(begin());
+  }
 
   // O(1)
-  T& back() noexcept;
+  T& back() noexcept {
+    return *(--end());
+  }
 
   // O(1)
-  const T& back() const noexcept;
+  const T& back() const noexcept {
+    return *(--end());
+  }
 
   // O(1)
-  void push_front(T& value) noexcept;
+  void push_front(T& value) noexcept {
+    insert(begin(), value);
+  }
 
   // O(1)
-  void push_back(T& value) noexcept;
+  void push_back(T& value) noexcept {
+    insert(end(), value);
+  }
 
   // O(1)
-  void pop_front() noexcept;
+  void pop_front() noexcept {
+    erase(begin());
+  }
 
   // O(1)
-  void pop_back() noexcept;
+  void pop_back() noexcept {
+    erase(rbegin());
+  }
 
   // O(1)
-  void clear() noexcept;
+  void clear() noexcept {
+    sentinel.link_on_this();
+  }
 
   // O(1)
-  iterator begin() noexcept;
+  iterator begin() noexcept {
+    return iterator(sentinel.next);
+  }
 
   // O(1)
-  const_iterator begin() const noexcept;
+  const_iterator begin() const noexcept {
+    return const_iterator(sentinel.next);
+  }
 
   // O(1)
-  iterator end() noexcept;
+  iterator end() noexcept {
+    return iterator(&sentinel);
+  }
 
   // O(1)
-  const_iterator end() const noexcept;
+  const_iterator end() const noexcept {
+    return const_iterator(&sentinel);
+  }
 
   // O(1)
-  iterator insert(const_iterator pos, T& value) noexcept;
+  iterator rbegin() noexcept {
+    return end();
+  }
 
   // O(1)
-  iterator erase(const_iterator pos) noexcept;
+  const_iterator rbegin() const noexcept {
+    return end();
+  }
 
   // O(1)
-  void splice(const_iterator pos, list& other, const_iterator first, const_iterator last) noexcept;
+  iterator rend() noexcept {
+    return begin();
+  }
+
+  // O(1)
+  const_iterator rend() const noexcept {
+    return begin();
+  }
+
+  // O(1)
+  iterator insert(const_iterator pos, T& value) noexcept {
+    list_element_base* new_node = pos;
+    node& new_value = value;
+
+    if (new_node != &new_value) {
+      new_value.unlink();
+      new_value.link_before(new_node->prev);
+      new_value.link_after(new_node);
+    }
+    return iterator(&new_value);
+  }
+
+  // O(1)
+  iterator erase(const_iterator pos) noexcept {
+    list_element_base* new_node = pos;
+    list_element_base* previous = new_node->prev;
+    if (new_node != &sentinel) {
+      new_node->unlink();
+    }
+    return iterator(previous);
+  }
+
+  // O(1)
+  void splice(const_iterator pos, list& other, const_iterator first, const_iterator last) noexcept {
+    if (this != &other) {
+      list_element_base* new_last = last;
+      list_element_base* pre_last = new_last->prev;
+
+      list_element_base* new_first = first;
+      list_element_base* pre_first = new_first->prev;
+
+      pre_first->link_after(new_last);
+
+      list_element_base* new_node = pos;
+      list_element_base* pre_node = new_node->prev;
+
+      pre_node->link_after(new_first);
+      pre_last->link_after(new_node);
+    }
+  }
+
+private:
+  node sentinel;
 };
 
 } // namespace intrusive
