@@ -74,12 +74,12 @@ public:
 
   // O(1)
   T& back() noexcept {
-    return *(--end());
+    return *(std::prev(end()));
   }
 
   // O(1)
   const T& back() const noexcept {
-    return *(--end());
+    return *(std::prev(end()));
   }
 
   // O(1)
@@ -99,7 +99,7 @@ public:
 
   // O(1)
   void pop_back() noexcept {
-    erase(rbegin());
+    erase(std::prev(end()));
   }
 
   // O(1)
@@ -163,16 +163,16 @@ public:
   // O(1)
   iterator erase(const_iterator pos) noexcept {
     list_element_base* new_node = pos;
-    list_element_base* previous = new_node->prev;
+    list_element_base* next = new_node->next;
     if (new_node != &sentinel) {
       new_node->unlink();
     }
-    return iterator(previous);
+    return iterator(next);
   }
 
   // O(1)
   void splice(const_iterator pos, list& other, const_iterator first, const_iterator last) noexcept {
-    if (this != &other) {
+    if (first != last) {
       list_element_base* new_last = last;
       list_element_base* pre_last = new_last->prev;
 
