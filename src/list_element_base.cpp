@@ -50,7 +50,6 @@ void list_element_base::unlink() noexcept {
   }
 }
 
-
 void list_element_base::link_after(list_element_base* node) noexcept {
   next = node;
   node->prev = this;
