@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <type_traits>
+#include <utility>
 
 struct list_element_base {
   list_element_base* next{this};
