@@ -42,18 +42,18 @@ bool list_element_base::is_linked() const noexcept {
 }
 
 void list_element_base::unlink() noexcept {
-  if (prev->next == this && next->prev == this) {
+  if (prev->next == this /*&& next->prev == this*/) {
     prev->link_after(next);
   }
   link_on_this();
 }
 
-void list_element_base::link_after(list_element_base* const other) noexcept {
-  next = other;
-  other->prev = this;
+void list_element_base::link_after(list_element_base* node) noexcept {
+  next = node;
+  node->prev = this;
 }
 
-void list_element_base::link_before(list_element_base* const other) noexcept {
-  other->next = this;
-  prev = other;
+void list_element_base::link_before(list_element_base* node) noexcept {
+  node->next = this;
+  prev = node;
 }
