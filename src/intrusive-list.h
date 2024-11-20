@@ -171,7 +171,7 @@ public:
   }
 
   // O(1)
-  void splice(const_iterator pos, list& other, const_iterator first, const_iterator last) noexcept {
+  void splice(const_iterator pos, [[maybe_unused]] list& other, const_iterator first, const_iterator last) noexcept {
     if (first != last) {
       list_element_base* new_last = last;
       list_element_base* pre_last = new_last->prev;
