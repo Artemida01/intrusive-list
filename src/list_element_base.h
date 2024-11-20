@@ -5,8 +5,8 @@
 #include <utility>
 
 struct list_element_base {
-  list_element_base* next{this};
-  list_element_base* prev{this};
+  list_element_base* prev;
+  list_element_base* next;
 
   list_element_base() noexcept;
 

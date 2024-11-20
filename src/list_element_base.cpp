@@ -1,19 +1,20 @@
 #include "list_element_base.h"
 
-list_element_base::list_element_base() noexcept = default;
+list_element_base::list_element_base() noexcept
+    : prev(this)
+    , next(this) {}
 
 list_element_base::list_element_base(list_element_base&& other) noexcept
     : list_element_base() {
   *this = std::move(other);
 }
 
-list_element_base::list_element_base(const list_element_base& other) noexcept = default;
+list_element_base::list_element_base(const list_element_base&) noexcept
+    : list_element_base() {}
 
 list_element_base& list_element_base::operator=(const list_element_base& other) noexcept {
   if (this != &other) {
     unlink();
-    next = other.next;
-    prev = other.prev;
   }
   return *this;
 }
@@ -38,16 +39,12 @@ void list_element_base::link_on_this() noexcept {
 }
 
 bool list_element_base::is_linked() const noexcept {
-  return next != this;
+  return prev != this;
 }
 
 void list_element_base::unlink() noexcept {
-  if (is_linked()) {
-    if (prev->next == this) {
-      prev->link_after(next);
-    }
-    link_on_this();
-  }
+  prev->link_after(next);
+  link_on_this();
 }
 
 void list_element_base::link_after(list_element_base* node) noexcept {
