@@ -29,7 +29,7 @@ list_element_base& list_element_base::operator=(list_element_base&& other) noexc
   return *this;
 }
 
-list_element_base::~list_element_base() {
+list_element_base::~list_element_base() noexcept {
   unlink();
 }
 
