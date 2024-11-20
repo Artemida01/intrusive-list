@@ -43,7 +43,7 @@ bool list_element_base::is_linked() const noexcept {
 
 void list_element_base::unlink() noexcept {
   if (is_linked()) {
-    if (prev && next && prev->next == this && next->prev == this) {
+    if (prev->next == this) {
       prev->link_after(next);
     }
     link_on_this();
