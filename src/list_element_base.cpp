@@ -1,25 +1,21 @@
 #include "list_element_base.h"
 
-list_element_base::list_element_base() noexcept
-    : prev(this)
-    , next(this) {}
-
-list_element_base::list_element_base(list_element_base&& other) noexcept
+intrusive::list_element_base::list_element_base(list_element_base&& other) noexcept
     : list_element_base() {
   *this = std::move(other);
 }
 
-list_element_base::list_element_base(const list_element_base&) noexcept
+intrusive::list_element_base::list_element_base(const list_element_base&) noexcept
     : list_element_base() {}
 
-list_element_base& list_element_base::operator=(const list_element_base& other) noexcept {
+intrusive::list_element_base& intrusive::list_element_base::operator=(const list_element_base& other) noexcept {
   if (this != &other) {
     unlink();
   }
   return *this;
 }
 
-list_element_base& list_element_base::operator=(list_element_base&& other) noexcept {
+intrusive::list_element_base& intrusive::list_element_base::operator=(list_element_base&& other) noexcept {
   if (this != &other) {
     unlink();
     if (other.is_linked()) {
@@ -30,29 +26,29 @@ list_element_base& list_element_base::operator=(list_element_base&& other) noexc
   return *this;
 }
 
-list_element_base::~list_element_base() noexcept {
+intrusive::list_element_base::~list_element_base() noexcept {
   unlink();
 }
 
-void list_element_base::link_on_this() noexcept {
+void intrusive::list_element_base::link_on_this() noexcept {
   next = prev = this;
 }
 
-bool list_element_base::is_linked() const noexcept {
+bool intrusive::list_element_base::is_linked() const noexcept {
   return prev != this;
 }
 
-void list_element_base::unlink() noexcept {
+void intrusive::list_element_base::unlink() noexcept {
   prev->link_after(next);
   link_on_this();
 }
 
-void list_element_base::link_after(list_element_base* node) noexcept {
+void intrusive::list_element_base::link_after(list_element_base* node) noexcept {
   next = node;
   node->prev = this;
 }
 
-void list_element_base::link_before(list_element_base* node) noexcept {
+void intrusive::list_element_base::link_before(list_element_base* node) noexcept {
   node->next = this;
   prev = node;
 }

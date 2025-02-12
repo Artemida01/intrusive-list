@@ -12,7 +12,13 @@ namespace intrusive {
 struct default_tag;
 
 template <typename Tag = default_tag>
-struct list_element : list_element_base {};
+struct list_element : private list_element_base {
+  template <typename, typename>
+  friend class list;
+
+  template <typename, typename>
+  friend class intrusive_iterator;
+};
 
 template <typename T, typename Tag = default_tag>
 class list {
@@ -26,8 +32,6 @@ public:
 
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-
-  // using list_element_base = std::conditional_t<std::is_const_v<T>, const list_element_base, list_element_base>;
 
 public:
   // O(1)
@@ -53,14 +57,8 @@ public:
 
   // O(n)
   size_t size() const noexcept {
-    size_t answer = 0;
-    list_element_base* current_position = sentinel.next;
-    while (current_position != &sentinel) {
-      answer++;
-      current_position = current_position->next;
-    }
-    return answer;
-  } // заменить на что-то из стандарта
+    return std::distance(begin(), end());
+  }
 
   // O(1)
   T& front() noexcept {
@@ -128,22 +126,22 @@ public:
   }
 
   // O(1)
-  iterator rbegin() noexcept {
+  reverse_iterator rbegin() noexcept {
     return end();
   }
 
   // O(1)
-  const_iterator rbegin() const noexcept {
+  const_reverse_iterator rbegin() const noexcept {
     return end();
   }
 
   // O(1)
-  iterator rend() noexcept {
+  reverse_iterator rend() noexcept {
     return begin();
   }
 
   // O(1)
-  const_iterator rend() const noexcept {
+  const_reverse_iterator rend() const noexcept {
     return begin();
   }
 

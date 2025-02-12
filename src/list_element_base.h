@@ -4,11 +4,13 @@
 #include <type_traits>
 #include <utility>
 
-struct list_element_base {
-  list_element_base* prev;
-  list_element_base* next;
+namespace intrusive {
 
-  list_element_base() noexcept;
+struct list_element_base {
+  list_element_base* prev{this};
+  list_element_base* next{this};
+
+  list_element_base() noexcept = default;
 
   list_element_base(list_element_base&& other) noexcept;
 
@@ -30,3 +32,4 @@ struct list_element_base {
 
   void link_before(list_element_base* const other) noexcept;
 };
+} // namespace intrusive
